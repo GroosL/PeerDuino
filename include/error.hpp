@@ -1,8 +1,8 @@
 #pragma once
 
+#include <cstddef>
 #include <cstdint>
-#include <vector>
 
-uint16_t crc16(const std::vector<uint8_t>& data);
+uint16_t crc16(const uint8_t* data, size_t length);
 
-bool verify_crc(const std::vector<uint8_t>& data, uint16_t received_crc);
+bool verify_crc(const uint8_t* data, size_t length, uint16_t received_crc);

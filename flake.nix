@@ -1,5 +1,5 @@
 {
-  description = "Flake para o trabalho 2 de comunicacao de dados";
+  description = "PeerDuino devFlake";
 
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
@@ -22,7 +22,6 @@
             pkg-config
             lldb
             valgrind
-            package-version-server
 
             bear
           ];

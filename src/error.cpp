@@ -1,8 +1,9 @@
 #include "error.hpp"
 
-uint16_t crc16(const std::vector<uint8_t>& data){
+uint16_t crc16(const uint8_t* data, size_t length) {
     uint16_t reg{0}, generator{0x1021};
-    for (uint8_t byte : data) {
+    for (size_t j = 0; j < length; j++) {
+        uint8_t byte = data[j];
         for (int i = 7; i >= 0; i--) {
             uint8_t msb {static_cast<uint8_t>(reg >> 15)};
             uint8_t bit {static_cast<uint8_t>((byte >> i) & 1)};
@@ -21,9 +22,6 @@ uint16_t crc16(const std::vector<uint8_t>& data){
     return reg;
 }
 
-bool verify_crc(const std::vector<uint8_t>& data, uint16_t received_crc) {
-    std::vector<uint8_t> augmented = data;
-    augmented.push_back(static_cast<uint8_t>(received_crc >> 8));   // Primeiro byte do
-    augmented.push_back(static_cast<uint8_t>(received_crc & 0xFF)); // LSB
-    return crc16(augmented) == 0;
+bool verify_crc(const uint8_t* data, size_t length, uint16_t received_crc) {
+    return crc16(data, length) == received_crc;
 }
