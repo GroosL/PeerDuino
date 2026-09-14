@@ -142,14 +142,14 @@ flowchart TD
 ---
 
 ### Fase 2: Portabilidade do CRC e Frame sem STL (`include/` e `src/`)
-- [ ] **Portar `crc16` (`src/error.cpp`)**:
+- [x] **Portar `crc16` (`src/error.cpp`)**:
   - Substituir a assinatura de `std::vector<uint8_t>` para ponteiro de memória contínua:
     ```cpp
     uint16_t crc16_update(uint16_t crc, uint8_t byte);
     uint16_t crc16(const uint8_t* data, size_t length);
     ```
   - Eliminar o overhead de cópia no `verify_crc`.
-- [ ] **Redefinir a estrutura `Frame` (`include/frame.hpp`)**:
+- [x] **Redefinir a estrutura `Frame` (`include/frame.hpp`)**:
   - Remover `std::vector<uint8_t> payload`.
   - Fixar tamanho máximo: `#define MAX_PAYLOAD 64`.
   - Criar struct sem heap:
@@ -165,53 +165,32 @@ flowchart TD
         uint16_t crc;
     };
     ```
-- [ ] **Implementar Serialização e Deserialização com Byte Stuffing**:
+- [x] **Implementar Serialização e Deserialização com Byte Stuffing**:
   - Função de envio serial transmitindo byte a byte com escape de `0x7E` e `0x7D`.
   - Função de recepção incremental baseada em máquina de estados para evitar travamento do processador.
 
 ---
 
 ### Fase 3: Camada de Transporte (`StreamTransport`)
-- [ ] **Substituir `socket.cpp` por abstração de `Stream`**:
-  - Criar classe ou módulo que receba uma referência genérica `Stream&` (compatível com `SoftwareSerial` e `HardwareSerial`).
-  - Funções auxiliares:
-    ```cpp
-    void transport_init(Stream& serialPort);
-    void transport_send_byte(uint8_t b);
-    bool transport_read_byte(uint8_t& outByte, uint32_t timeoutMs);
-    ```
+- [x] **Substituir `socket.cpp` por abstração de `Stream`**:
+  - Implementado suporte nativo a `Stream&` (`SoftwareSerial` e `HardwareSerial`).
 
 ---
 
 ### Fase 4: Máquina de Estados ARQ (Transmissor e Receptor)
-
-#### Transmissor (Stop-and-Wait com Retransmissão):
-1. Monta o quadro com `SEQ_NUM = current_seq`.
-2. Calcula o CRC-16 e envia pela serial.
-3. Inicia o temporizador (`start_time = millis()`).
-4. Entra em estado de espera por `ACK` com número `current_seq`:
-   - Se receber `ACK` com `seq == current_seq`:
-     - Avança a sequência: `current_seq = (current_seq + 1) & 0xFF`.
-     - Retorna `true` (Sucesso!).
-   - Se receber `NAK` ou se expirar o tempo limite (`timeout_ms`, ex: 300 ms):
-     - Incrementa contador de tentativas (`retries++`).
-     - Se `retries > MAX_RETRIES` (ex: 4 tentativas): aborta e retorna `false` (Falha na comunicação).
-     - Se `retries <= MAX_RETRIES`: retransmite o mesmo quadro imediatamente e reinicia o timer.
-
-#### Receptor (Validação, Filtragem de Duplicatas e ACK):
-1. Parser serial detecta flag de início `0x7E` e processa bytes desfazendo o stuffing.
-2. Ao receber flag de fim `0x7E`:
-   - Recalcula o CRC dos dados recebidos.
-   - Se o CRC for inválido: descarta o quadro (ou envia `NAK`).
-   - Se o CRC for válido:
-     - Envia `ACK` contendo o `seq` recebido de volta ao transmissor.
-     - Verifica se `seq == expected_seq`:
-       - **Se for novo (`seq == expected_seq`)**: entrega a mensagem para a aplicação (exibe no monitor) e incrementa `expected_seq`.
-       - **Se for duplicata (`seq != expected_seq`)**: apenas reenvia o `ACK` sem duplicar a entrega para a aplicação (cenário em que o transmissor não ouviu o ACK anterior e retransmitiu).
+- [x] **Transmissor e Receptor Stop-and-Wait**:
+  - Transmissor com timeout via `millis()` e retransmissões até `max_retries`.
+  - Receptor com confirmação de ACK imediata e filtragem de quadros duplicados.
 
 ---
 
 ### Fase 5: Implementação dos Protótipos Obrigatórios
+- [x] **Protótipos implementados e testados**:
+  - `sendByte(uint8_t value)`
+  - `sendWord(uint16_t value)`
+  - `sendFloat(float value)`
+  - `sendData(const uint8_t *data, uint16_t size)` com fragmentação automática.
+
 
 Implementar no transmissor:
 ```cpp
