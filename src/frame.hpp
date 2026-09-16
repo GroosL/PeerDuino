@@ -1,7 +1,6 @@
 #pragma once
 
-#include <cstddef>
-#include <cstdint>
+#include <Arduino.h>
 
 #define MAX_PAYLOAD 64
 

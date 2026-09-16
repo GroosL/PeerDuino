@@ -1,6 +1,5 @@
 #include "frame.hpp"
 #include "error.hpp"
-#include <cstring>
 
 size_t serialize(const Frame &f, uint8_t *out) {
   if (!out || f.length > MAX_PAYLOAD)

@@ -1,9 +1,7 @@
 #pragma once
 
 #include "frame.hpp"
-#include <cstddef>
-#include <cstdint>
-#include <cstring>
+#include <Arduino.h>
 
 #if defined(ARDUINO) || defined(__AVR__)
 #include <Arduino.h>
